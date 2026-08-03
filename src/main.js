@@ -38,10 +38,15 @@ const allOnButton = document.querySelector("#allOnButton");
 const allOffButton = document.querySelector("#allOffButton");
 const sampleButton = document.querySelector("#sampleButton");
 const clearButton = document.querySelector("#clearButton");
+const winnerModal = document.querySelector("#winnerModal");
+const winnerModalTitle = document.querySelector("#winnerModalTitle");
+const closeWinnerModal = document.querySelector("#closeWinnerModal");
+const confettiLayer = document.querySelector("#confettiLayer");
 
 let names = loadNames();
 let rotation = 0;
 let spinning = false;
+let pendingWinnerId = null;
 
 function createId() {
   if (crypto.randomUUID) return crypto.randomUUID();
@@ -268,10 +273,15 @@ function spinWheel() {
       return;
     }
 
+    const selectedName = activeNames[selectedIndex];
+
     rotation = (startRotation + finalRotation) % (Math.PI * 2);
+    pendingWinnerId = selectedName.id;
     spinning = false;
-    winner.textContent = `${activeNames[selectedIndex].name} was picked!`;
+    winner.textContent = `${selectedName.name} was picked!`;
     renderList();
+    drawWheel();
+    showWinnerCelebration(selectedName.name);
   }
 
   requestAnimationFrame(animate);
@@ -320,7 +330,65 @@ clearButton.addEventListener("click", () => {
   saveAndRender();
 });
 
+closeWinnerModal.addEventListener("click", hideWinnerCelebration);
+
+winnerModal.addEventListener("click", (event) => {
+  if (event.target === winnerModal) hideWinnerCelebration();
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") hideWinnerCelebration();
+});
+
 window.addEventListener("resize", drawWheel);
+
+function showWinnerCelebration(name) {
+  winnerModalTitle.textContent = name;
+  winnerModal.classList.add("is-open");
+  winnerModal.setAttribute("aria-hidden", "false");
+  closeWinnerModal.focus();
+  burstConfetti();
+}
+
+function hideWinnerCelebration() {
+  winnerModal.classList.remove("is-open");
+  winnerModal.setAttribute("aria-hidden", "true");
+  confettiLayer.replaceChildren();
+
+  if (!pendingWinnerId) return;
+
+  names = names.map((item) =>
+    item.id === pendingWinnerId ? { ...item, active: false } : item
+  );
+  pendingWinnerId = null;
+  rotation = 0;
+  winner.textContent = "Ready for the next spin.";
+  saveAndRender();
+}
+
+function burstConfetti() {
+  confettiLayer.replaceChildren();
+
+  const colors = ["#ff6b6b", "#ffd166", "#4ecdc4", "#7bd88f", "#5aa9e6", "#c084fc", "#f472b6"];
+  const pieces = 92;
+
+  for (let index = 0; index < pieces; index += 1) {
+    const piece = document.createElement("span");
+    const startX = 10 + Math.random() * 80;
+    const drift = (Math.random() - 0.5) * 220;
+    const duration = 2.1 + Math.random() * 1.5;
+    const delay = Math.random() * 0.35;
+
+    piece.className = "confetti-piece";
+    piece.style.left = `${startX}%`;
+    piece.style.setProperty("--confetti-color", colors[index % colors.length]);
+    piece.style.setProperty("--confetti-drift", `${drift}px`);
+    piece.style.setProperty("--confetti-spin", `${Math.random() * 720 - 360}deg`);
+    piece.style.animationDuration = `${duration}s`;
+    piece.style.animationDelay = `${delay}s`;
+    confettiLayer.append(piece);
+  }
+}
 
 function normalizeRotation(value) {
   return ((value % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);

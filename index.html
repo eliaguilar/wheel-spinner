@@ -21,7 +21,7 @@
       <section class="spinner-stage" aria-labelledby="app-title">
         <div class="title-group">
           <p class="eyebrow">Classroom picker</p>
-          <h1 id="app-title">Name Wheel Spinner</h1>
+          <h1 id="app-title">Fri-Yay!</h1>
         </div>
 
         <div class="wheel-wrap">
@@ -87,6 +87,22 @@
         <ul id="nameList" class="name-list" aria-label="Student names"></ul>
       </aside>
     </main>
+
+    <div id="winnerModal" class="winner-modal" aria-hidden="true">
+      <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+      <section
+        class="winner-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="winnerModalTitle"
+      >
+        <p class="eyebrow">The wheel picked</p>
+        <h2 id="winnerModalTitle">Winner!</h2>
+        <button id="closeWinnerModal" class="primary-button modal-button" type="button">
+          Yay!
+        </button>
+      </section>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
