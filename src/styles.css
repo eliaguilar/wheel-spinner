@@ -337,7 +337,7 @@ textarea:focus {
 
 .backup-actions {
   grid-template-columns: repeat(2, 1fr);
-  margin-top: 0;
+  margin-top: 1rem;
 }
 
 .mini-button {
