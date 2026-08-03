@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A playful classroom name wheel spinner for picking students fairly."
+    />
+    <title>Classroom Name Wheel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="spinner-stage" aria-labelledby="app-title">
+        <div class="title-group">
+          <p class="eyebrow">Classroom picker</p>
+          <h1 id="app-title">Name Wheel Spinner</h1>
+        </div>
+
+        <div class="wheel-wrap">
+          <div class="pointer" aria-hidden="true"></div>
+          <canvas id="wheel" width="720" height="720" aria-label="Name wheel"></canvas>
+          <div class="wheel-center" aria-hidden="true">
+            <span>Spin!</span>
+          </div>
+        </div>
+
+        <div class="spin-controls">
+          <button id="spinButton" class="primary-button" type="button">
+            <span aria-hidden="true">✦</span>
+            Spin the Wheel
+          </button>
+          <button id="resetButton" class="ghost-button" type="button">Reset Spin</button>
+        </div>
+
+        <output id="winner" class="winner" aria-live="polite">
+          Add names, keep them switched on, then spin.
+        </output>
+      </section>
+
+      <aside class="names-panel" aria-labelledby="names-title">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Roster</p>
+            <h2 id="names-title">Names on the Wheel</h2>
+          </div>
+          <span id="activeCount" class="count-pill">0 active</span>
+        </div>
+
+        <form id="addNameForm" class="add-form">
+          <label for="nameInput">Add a name</label>
+          <div class="input-row">
+            <input
+              id="nameInput"
+              name="name"
+              type="text"
+              autocomplete="off"
+              placeholder="Student name"
+              maxlength="32"
+            />
+            <button class="icon-button add-button" type="submit" aria-label="Add name">+</button>
+          </div>
+        </form>
+
+        <label class="bulk-label" for="bulkNames">Paste names</label>
+        <textarea
+          id="bulkNames"
+          rows="5"
+          placeholder="One name per line, or separated by commas"
+        ></textarea>
+        <button id="bulkAddButton" class="secondary-button" type="button">Add Pasted Names</button>
+
+        <div class="quick-actions" aria-label="Roster actions">
+          <button id="allOnButton" class="mini-button" type="button">All On</button>
+          <button id="allOffButton" class="mini-button" type="button">All Off</button>
+          <button id="sampleButton" class="mini-button" type="button">Sample</button>
+          <button id="clearButton" class="mini-button danger" type="button">Clear</button>
+        </div>
+
+        <ul id="nameList" class="name-list" aria-label="Student names"></ul>
+      </aside>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
