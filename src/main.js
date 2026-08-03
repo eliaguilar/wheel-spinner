@@ -27,17 +27,16 @@ const canvas = document.querySelector("#wheel");
 const ctx = canvas.getContext("2d");
 const nameList = document.querySelector("#nameList");
 const activeCount = document.querySelector("#activeCount");
-const winner = document.querySelector("#winner");
 const spinButton = document.querySelector("#spinButton");
-const resetButton = document.querySelector("#resetButton");
-const addNameForm = document.querySelector("#addNameForm");
-const nameInput = document.querySelector("#nameInput");
-const bulkNames = document.querySelector("#bulkNames");
-const bulkAddButton = document.querySelector("#bulkAddButton");
+const addNamesForm = document.querySelector("#addNamesForm");
+const namesInput = document.querySelector("#namesInput");
 const allOnButton = document.querySelector("#allOnButton");
 const allOffButton = document.querySelector("#allOffButton");
-const sampleButton = document.querySelector("#sampleButton");
 const clearButton = document.querySelector("#clearButton");
+const openAdminButton = document.querySelector("#openAdminButton");
+const closeAdminButton = document.querySelector("#closeAdminButton");
+const teacherDrawer = document.querySelector("#teacherDrawer");
+const drawerOverlay = document.querySelector("#drawerOverlay");
 const winnerModal = document.querySelector("#winnerModal");
 const winnerModalTitle = document.querySelector("#winnerModalTitle");
 const closeWinnerModal = document.querySelector("#closeWinnerModal");
@@ -248,7 +247,6 @@ function spinWheel() {
 
   spinning = true;
   renderList();
-  winner.textContent = "Round and round...";
 
   const selectedIndex = Math.floor(Math.random() * activeNames.length);
   const slice = (Math.PI * 2) / activeNames.length;
@@ -278,7 +276,6 @@ function spinWheel() {
     rotation = (startRotation + finalRotation) % (Math.PI * 2);
     pendingWinnerId = selectedName.id;
     spinning = false;
-    winner.textContent = `${selectedName.name} was picked!`;
     renderList();
     drawWheel();
     showWinnerCelebration(selectedName.name);
@@ -287,26 +284,14 @@ function spinWheel() {
   requestAnimationFrame(animate);
 }
 
-addNameForm.addEventListener("submit", (event) => {
+addNamesForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  addNames([nameInput.value]);
-  nameInput.value = "";
-  nameInput.focus();
-});
-
-bulkAddButton.addEventListener("click", () => {
-  const pastedNames = bulkNames.value.split(/[\n,]+/);
-  addNames(pastedNames);
-  bulkNames.value = "";
+  addNames(namesInput.value.split(/[\n,]+/));
+  namesInput.value = "";
+  namesInput.focus();
 });
 
 spinButton.addEventListener("click", spinWheel);
-
-resetButton.addEventListener("click", () => {
-  rotation = 0;
-  winner.textContent = "Ready for the next spin.";
-  drawWheel();
-});
 
 allOnButton.addEventListener("click", () => {
   names = names.map((item) => ({ ...item, active: true }));
@@ -318,17 +303,22 @@ allOffButton.addEventListener("click", () => {
   saveAndRender();
 });
 
-sampleButton.addEventListener("click", () => {
-  names = DEFAULT_NAMES.map((name) => ({ id: createId(), name, active: true }));
-  winner.textContent = "Sample roster loaded.";
+clearButton.addEventListener("click", () => {
+  const shouldClear = window.confirm(
+    "Clear every name from the roster? This cannot be undone."
+  );
+
+  if (!shouldClear) return;
+
+  names = [];
+  pendingWinnerId = null;
+  rotation = 0;
   saveAndRender();
 });
 
-clearButton.addEventListener("click", () => {
-  names = [];
-  winner.textContent = "The wheel is clear.";
-  saveAndRender();
-});
+openAdminButton.addEventListener("click", showTeacherDrawer);
+closeAdminButton.addEventListener("click", hideTeacherDrawer);
+drawerOverlay.addEventListener("click", hideTeacherDrawer);
 
 closeWinnerModal.addEventListener("click", hideWinnerCelebration);
 
@@ -337,7 +327,9 @@ winnerModal.addEventListener("click", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") hideWinnerCelebration();
+  if (event.key !== "Escape") return;
+  hideWinnerCelebration();
+  hideTeacherDrawer();
 });
 
 window.addEventListener("resize", drawWheel);
@@ -362,8 +354,24 @@ function hideWinnerCelebration() {
   );
   pendingWinnerId = null;
   rotation = 0;
-  winner.textContent = "Ready for the next spin.";
   saveAndRender();
+}
+
+function showTeacherDrawer() {
+  teacherDrawer.classList.add("is-open");
+  drawerOverlay.classList.add("is-open");
+  teacherDrawer.setAttribute("aria-hidden", "false");
+  drawerOverlay.setAttribute("aria-hidden", "false");
+  openAdminButton.setAttribute("aria-expanded", "true");
+  namesInput.focus();
+}
+
+function hideTeacherDrawer() {
+  teacherDrawer.classList.remove("is-open");
+  drawerOverlay.classList.remove("is-open");
+  teacherDrawer.setAttribute("aria-hidden", "true");
+  drawerOverlay.setAttribute("aria-hidden", "true");
+  openAdminButton.setAttribute("aria-expanded", "false");
 }
 
 function burstConfetti() {

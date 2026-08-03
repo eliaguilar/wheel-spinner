@@ -17,10 +17,20 @@
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
+    <button
+      id="openAdminButton"
+      class="admin-toggle"
+      type="button"
+      aria-controls="teacherDrawer"
+      aria-expanded="false"
+    >
+      Roster
+    </button>
+
     <main class="app-shell">
       <section class="spinner-stage" aria-labelledby="app-title">
         <div class="title-group">
-          <p class="eyebrow">Classroom picker</p>
+          <p class="eyebrow">The Name Picker</p>
           <h1 id="app-title">Fri-Yay!</h1>
         </div>
 
@@ -37,56 +47,55 @@
             <span aria-hidden="true">✦</span>
             Spin the Wheel
           </button>
-          <button id="resetButton" class="ghost-button" type="button">Reset Spin</button>
         </div>
-
-        <output id="winner" class="winner" aria-live="polite">
-          Add names, keep them switched on, then spin.
-        </output>
       </section>
+    </main>
 
-      <aside class="names-panel" aria-labelledby="names-title">
+    <div id="drawerOverlay" class="drawer-overlay" aria-hidden="true"></div>
+
+    <aside
+      id="teacherDrawer"
+      class="names-panel"
+      aria-labelledby="names-title"
+      aria-hidden="true"
+    >
         <div class="panel-header">
           <div>
             <p class="eyebrow">Roster</p>
             <h2 id="names-title">Names on the Wheel</h2>
           </div>
-          <span id="activeCount" class="count-pill">0 active</span>
+          <div class="panel-actions">
+            <span id="activeCount" class="count-pill">0 active</span>
+            <button
+              id="closeAdminButton"
+              class="drawer-close"
+              type="button"
+              aria-label="Close roster drawer"
+            >
+              ×
+            </button>
+          </div>
         </div>
 
-        <form id="addNameForm" class="add-form">
-          <label for="nameInput">Add a name</label>
-          <div class="input-row">
-            <input
-              id="nameInput"
-              name="name"
-              type="text"
-              autocomplete="off"
-              placeholder="Student name"
-              maxlength="32"
-            />
-            <button class="icon-button add-button" type="submit" aria-label="Add name">+</button>
-          </div>
+        <form id="addNamesForm" class="add-form">
+          <label for="namesInput">Add names</label>
+          <textarea
+            id="namesInput"
+            name="names"
+            rows="5"
+            placeholder="One name, one name per line, or names separated by commas"
+          ></textarea>
+          <button id="addNamesButton" class="secondary-button" type="submit">Add Names</button>
         </form>
-
-        <label class="bulk-label" for="bulkNames">Paste names</label>
-        <textarea
-          id="bulkNames"
-          rows="5"
-          placeholder="One name per line, or separated by commas"
-        ></textarea>
-        <button id="bulkAddButton" class="secondary-button" type="button">Add Pasted Names</button>
 
         <div class="quick-actions" aria-label="Roster actions">
           <button id="allOnButton" class="mini-button" type="button">All On</button>
           <button id="allOffButton" class="mini-button" type="button">All Off</button>
-          <button id="sampleButton" class="mini-button" type="button">Sample</button>
           <button id="clearButton" class="mini-button danger" type="button">Clear</button>
         </div>
 
         <ul id="nameList" class="name-list" aria-label="Student names"></ul>
       </aside>
-    </main>
 
     <div id="winnerModal" class="winner-modal" aria-hidden="true">
       <div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
