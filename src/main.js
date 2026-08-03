@@ -1,4 +1,7 @@
 const STORAGE_KEY = "classroom-name-wheel:v1";
+const MAX_NAMES = 80;
+const MAX_NAME_LENGTH = 32;
+const MAX_INPUT_LENGTH = 1600;
 const DEFAULT_NAMES = [
   "Ava",
   "Noah",
@@ -46,9 +49,10 @@ let names = loadNames();
 let rotation = 0;
 let spinning = false;
 let pendingWinnerId = null;
+let storageWarningShown = false;
 
 function createId() {
-  if (crypto.randomUUID) return crypto.randomUUID();
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
@@ -56,17 +60,54 @@ function loadNames() {
   try {
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (Array.isArray(stored)) {
-      return stored.filter((item) => item && typeof item.name === "string");
+      const sanitized = sanitizeStoredNames(stored);
+      return sanitized.length ? sanitized : getDefaultNames();
     }
   } catch {
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Some privacy modes block localStorage entirely.
+    }
   }
 
+  return getDefaultNames();
+}
+
+function getDefaultNames() {
   return DEFAULT_NAMES.map((name) => ({ id: createId(), name, active: true }));
 }
 
+function sanitizeStoredNames(value) {
+  const seenNames = new Set();
+
+  return value
+    .map((item) => ({
+      id: typeof item?.id === "string" && item.id ? item.id : createId(),
+      name: normalizeName(String(item?.name ?? "")),
+      active: item?.active !== false
+    }))
+    .filter((item) => {
+      if (!item.name) return false;
+
+      const key = item.name.toLowerCase();
+      if (seenNames.has(key)) return false;
+
+      seenNames.add(key);
+      return true;
+    })
+    .slice(0, MAX_NAMES);
+}
+
 function saveNames() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(names));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(names));
+  } catch {
+    if (storageWarningShown) return;
+
+    storageWarningShown = true;
+    window.alert("The roster could not be saved in this browser.");
+  }
 }
 
 function getActiveNames() {
@@ -74,11 +115,12 @@ function getActiveNames() {
 }
 
 function normalizeName(value) {
-  return value.trim().replace(/\s+/g, " ");
+  return value.trim().replace(/\s+/g, " ").slice(0, MAX_NAME_LENGTH);
 }
 
 function addNames(values) {
   const existing = new Set(names.map((item) => item.name.toLowerCase()));
+  const remainingSlots = Math.max(MAX_NAMES - names.length, 0);
   const freshNames = values
     .map(normalizeName)
     .filter(Boolean)
@@ -87,7 +129,8 @@ function addNames(values) {
       if (existing.has(key)) return false;
       existing.add(key);
       return true;
-    });
+    })
+    .slice(0, remainingSlots);
 
   if (!freshNames.length) return;
 
@@ -286,7 +329,17 @@ function spinWheel() {
 
 addNamesForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  addNames(namesInput.value.split(/[\n,]+/));
+
+  const value = namesInput.value.slice(0, MAX_INPUT_LENGTH);
+  if (!value.trim()) return;
+
+  const previousCount = names.length;
+  addNames(value.split(/[\n,]+/));
+  if (names.length === previousCount) {
+    window.alert("No new names were added. They may already be on the roster.");
+    return;
+  }
+
   namesInput.value = "";
   namesInput.focus();
 });
@@ -304,8 +357,11 @@ allOffButton.addEventListener("click", () => {
 });
 
 clearButton.addEventListener("click", () => {
+  const nameCount = names.length;
+  if (!nameCount) return;
+
   const shouldClear = window.confirm(
-    "Clear every name from the roster? This cannot be undone."
+    `Clear all ${nameCount} names from the roster? This cannot be undone.`
   );
 
   if (!shouldClear) return;
