@@ -5,6 +5,6 @@
   "description": "A kid-friendly classroom name wheel spinner.",
   "scripts": {
     "dev": "python3 -m http.server 5173",
-    "build": "echo 'Static site ready'"
+    "build": "mkdir -p public && cp -R index.html src public/"
   }
 }
