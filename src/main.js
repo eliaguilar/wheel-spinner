@@ -446,9 +446,16 @@ winnerModal.addEventListener("click", (event) => {
 });
 
 window.addEventListener("keydown", (event) => {
-  if (event.key !== "Escape") return;
-  hideWinnerCelebration();
-  hideTeacherDrawer();
+  if (event.key === "Escape") {
+    hideWinnerCelebration();
+    hideTeacherDrawer();
+    return;
+  }
+
+  if (event.code !== "Space" || shouldIgnoreShortcut(event.target)) return;
+
+  event.preventDefault();
+  spinWheel();
 });
 
 window.addEventListener("resize", drawWheel);
@@ -491,6 +498,15 @@ function hideTeacherDrawer() {
   teacherDrawer.setAttribute("aria-hidden", "true");
   drawerOverlay.setAttribute("aria-hidden", "true");
   openAdminButton.setAttribute("aria-expanded", "false");
+}
+
+function shouldIgnoreShortcut(target) {
+  if (winnerModal.classList.contains("is-open")) return true;
+  if (teacherDrawer.classList.contains("is-open")) return true;
+  if (!(target instanceof HTMLElement)) return false;
+
+  const editableSelector = "button, input, textarea, select, [contenteditable='true']";
+  return Boolean(target.closest(editableSelector));
 }
 
 function burstConfetti() {
