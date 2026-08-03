@@ -513,6 +513,10 @@ textarea:focus {
   transition: transform 220ms ease;
 }
 
+.winner-eyebrow {
+  color: #25314f;
+}
+
 .winner-modal.is-open .winner-card {
   transform: translateY(0) scale(1);
 }
