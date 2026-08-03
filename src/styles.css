@@ -327,11 +327,17 @@ textarea:focus {
   padding: 0.7rem 0.8rem;
 }
 
-.quick-actions {
+.quick-actions,
+.backup-actions {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 0.45rem;
   margin: 1rem 0;
+}
+
+.backup-actions {
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 0;
 }
 
 .mini-button {
@@ -342,6 +348,19 @@ textarea:focus {
 
 .mini-button.danger {
   background: #ff9aa7;
+}
+
+.import-button {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+#importRosterInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
 }
 
 .name-list {
@@ -560,6 +579,10 @@ textarea:focus {
   }
 
   .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .backup-actions {
     grid-template-columns: 1fr;
   }
 }

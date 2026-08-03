@@ -95,6 +95,12 @@
           <button id="clearButton" class="mini-button danger" type="button">Clear</button>
         </div>
 
+        <div class="backup-actions" aria-label="Roster backup actions">
+          <button id="exportRosterButton" class="mini-button" type="button">Download Backup</button>
+          <label class="mini-button import-button" for="importRosterInput">Restore Backup</label>
+          <input id="importRosterInput" type="file" accept="application/json,.json" />
+        </div>
+
         <ul id="nameList" class="name-list" aria-label="Student names"></ul>
       </aside>
 

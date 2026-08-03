@@ -2,6 +2,7 @@ const STORAGE_KEY = "classroom-name-wheel:v1";
 const MAX_NAMES = 80;
 const MAX_NAME_LENGTH = 32;
 const MAX_INPUT_LENGTH = 1600;
+const MAX_IMPORT_BYTES = 64 * 1024;
 const DEFAULT_NAMES = [
   "Ava",
   "Noah",
@@ -36,6 +37,8 @@ const namesInput = document.querySelector("#namesInput");
 const allOnButton = document.querySelector("#allOnButton");
 const allOffButton = document.querySelector("#allOffButton");
 const clearButton = document.querySelector("#clearButton");
+const exportRosterButton = document.querySelector("#exportRosterButton");
+const importRosterInput = document.querySelector("#importRosterInput");
 const openAdminButton = document.querySelector("#openAdminButton");
 const closeAdminButton = document.querySelector("#closeAdminButton");
 const teacherDrawer = document.querySelector("#teacherDrawer");
@@ -108,6 +111,15 @@ function saveNames() {
     storageWarningShown = true;
     window.alert("The roster could not be saved in this browser.");
   }
+}
+
+function getBackupPayload() {
+  return {
+    app: "fri-yay-spinner",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    names: names.map(({ name, active }) => ({ name, active }))
+  };
 }
 
 function getActiveNames() {
@@ -370,6 +382,57 @@ clearButton.addEventListener("click", () => {
   pendingWinnerId = null;
   rotation = 0;
   saveAndRender();
+});
+
+exportRosterButton.addEventListener("click", () => {
+  if (!names.length) {
+    window.alert("There are no names to back up yet.");
+    return;
+  }
+
+  const data = JSON.stringify(getBackupPayload(), null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const link = document.createElement("a");
+  const dateStamp = new Date().toISOString().slice(0, 10);
+
+  link.href = URL.createObjectURL(blob);
+  link.download = `fri-yay-roster-${dateStamp}.json`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+});
+
+importRosterInput.addEventListener("change", async () => {
+  const [file] = importRosterInput.files;
+  importRosterInput.value = "";
+  if (!file) return;
+
+  if (file.size > MAX_IMPORT_BYTES) {
+    window.alert("That backup file is too large.");
+    return;
+  }
+
+  try {
+    const imported = JSON.parse(await file.text());
+    const importedNames = sanitizeStoredNames(imported.names);
+
+    if (!importedNames.length) {
+      window.alert("No roster names were found in that backup file.");
+      return;
+    }
+
+    const shouldReplace = window.confirm(
+      `Restore ${importedNames.length} names from this backup? This will replace the current roster.`
+    );
+
+    if (!shouldReplace) return;
+
+    names = importedNames;
+    pendingWinnerId = null;
+    rotation = 0;
+    saveAndRender();
+  } catch {
+    window.alert("That backup file could not be read.");
+  }
 });
 
 openAdminButton.addEventListener("click", showTeacherDrawer);
