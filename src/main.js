@@ -481,6 +481,7 @@ function hideWinnerCelebration() {
   pendingWinnerId = null;
   rotation = 0;
   saveAndRender();
+  spinButton.focus({ preventScroll: true });
 }
 
 function showTeacherDrawer() {
